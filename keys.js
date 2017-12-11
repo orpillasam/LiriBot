@@ -10,20 +10,14 @@ var twitterKeys = {
 var spotifyKeys ={
     id: '05dcd79aa48b498d9f3aad54b842da98',
     secret: 'c99b2b58e1d8497296c361ecdb9bb0af'
-  },
+  }
 
 var omdbKey = {
-    apiKey: ''
+    key: ''
   }
-// var params = {screen_name: 'nodejs'};
-// client.get('statuses/user_timeline', params, function(error, tweets, response) {
-//   if (!error) {
-//     console.log(tweets);
-//   }
-// });
 
 module.exports = {
 	twitterKeys:twitterKeys,
 	spotifyKeys:spotifyKeys,
-	omdbKeys:omdbKeys
-	};
+	omdbKey:omdbKey.key
+};
