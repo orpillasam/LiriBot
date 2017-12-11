@@ -1,12 +1,13 @@
 
 var twitter = require('twitter');
 var spotify = require('node-spotify-api');
-var fetch = require('node-fetch');
+var request = require('request');
 var fs = require('fs');
 var apiKeys = require('./keys.js')
 
 var twitterAPIKey = new twitter(apiKeys.twitterKeys);
 var spotifyAPIKey = new spotify(apiKeys.spotifyKeys);
+
 
 
 var action = process.argv[2];
@@ -98,3 +99,34 @@ function getSpotify(){
 	}
 	})
 }
+
+/*---------------------------OMDB---------------------------*/
+
+function getMovie(){
+	var queryUrl = "http://www.omdbapi.com/?t=" + searchTerm + "&y=&plot=short&apikey=" + apiKeys.omdbKey;
+	console.log(queryUrl);
+	request(queryUrl, function(error, response, body) {
+
+  // If the request is successful
+  if (!error && response.statusCode === 200) {
+
+    // Parse the body of the site and recover just the imdbRating
+    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
+    // console.log(response);
+
+    var data = JSON.parse(body);
+    console.log(
+    "===========================================================" + "\n" +
+    "Title: " + data.Title + '\n' + 
+    "Year: " + data.Year + '\n' + 
+    "IMDB Rating: " + data.Ratings[0].Value + '\n' + 
+    "Rotten Tomato Rating: " + data.Ratings[1].Value + '\n' + 
+    "Country of Production: " + data.Country + '\n' + 
+    "Language: " + data.Language + '\n' + 
+    "Plot: " + data.Plot + '\n' + 
+    "Actors: " + data.Actors + '\n' +
+    "==========================================================="
+  );
+  }
+});
+};

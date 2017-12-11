@@ -13,7 +13,7 @@ var spotifyKeys ={
   }
 
 var omdbKey = {
-    key: ''
+    key: 'd13e6e6'
   }
 
 module.exports = {
