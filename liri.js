@@ -8,18 +8,30 @@ var apiKeys = require('./keys.js')
 var twitterAPIKey = new twitter(apiKeys.twitterKeys);
 var spotifyAPIKey = new spotify(apiKeys.spotifyKeys);
 
-
-
 var action = process.argv[2];
 var searchTerm = process.argv[3];
-
-
 
 for (var i = 4; i < process.argv.length; i++){
 	searchTerm += '+' + process.argv[i]
 };
 
 
+function showInstructions(){
+  console.log(
+    "----------------------------------------------" + "\n" +
+    'Thank you for using Liri Bot' + "\n" +
+    "Type 'node liri.js my-tweets' to see my last 20 tweets" + "\n" +
+    "Type 'node liri.js spotify-this-song' and a song title to find information on this song" + "\n" +
+    "Type 'node liri.js movie-this' and a movie title to find information on this song" + "\n" +
+    "Type 'node lirl.js do-what-it-says' to call a pre-defined song" + "\n" +
+    '----------------------------------------------'
+  );
+};
+
+
+/*------------Function to call different functions depending on the search term----------------*/
+
+function switchAction(){
 switch (action) {
   case "my-tweets":
     getTweets();
@@ -37,12 +49,14 @@ switch (action) {
     doWhatItSays();
     break;
 }
+};
+
 
 /*----------------------Twitter-----------------*/
 
 function getTweets(){
-	console.log("getting tweets");
-
+  console.log("getting tweets");
+  
 	var params = {
 	    screen_name: 'SunfyreTek1'
 	};
@@ -57,24 +71,27 @@ function getTweets(){
 			    console.log(twitterTweets)
 			    console.log('--------------------------');
 			  }
-			}
-	});
+      }
+      showInstructions();
+  });
+  
 };
 
+
 /*--------------------------Spotify --------------------*/
+
 
 function getSpotify(){
 	console.log('-------------------------')
 	console.log("Time to play your music!")
 	console.log(searchTerm);
-	var searchSong;
-	if (searchTerm === undefined) {
-	searchSong = 'The Sign'
-	} else {
-	searchSong = searchTerm
-	}
+  //searches for "The Sign by Ace of Base" if no search term was entered
+	if (searchTerm ===  undefined || searchTerm ==="") {
+  console.log("You didn't enter a song, so here's my favorite song!");
+	searchTerm = 'The Sign Ace of Base'
+	}; 
 
-	spotifyAPIKey.search({ type: 'track', query: searchSong }, function (err, data) {
+	spotifyAPIKey.search({ type: 'track', query: searchTerm }, function (err, data) {
 	if (err) {
 	  console.log('An error has occurred: ' + err)
 	} else {
@@ -84,25 +101,24 @@ function getSpotify(){
     	console.log("Artist: " + data.tracks.items[0].artists[k].name);
  	}
 	console.log("Song Name: " + data.tracks.items[0].name);
- 	console.log("Preview: " + data.tracks.items[0].external_urls.spotify);
+ 	console.log("Preview: " + data.tracks.items[0].preview_url);
    	console.log("Album Name: " + (data.tracks.items[0].album.name));
-	// let response = data.tracks.items
-	// let spotifyData = ('This is the top result I\'ve found for that search\n' + 'Track Title: ' + response[0].name + '\n' + 'Artist: ' + response[0].artists[0].name + '\n' + 'Album: ' + response[0].album.name)
-	// console.log(spotifyData)
-	// log(spotifyData)
-	// if (response[0].preview_url === null) {
-	//   console.log('Preview: No preview available')
-	// } else {
-	//   console.log('Preview: ' + response[0].preview_url)
-	// }
-	// console.log('--------------------')
-	}
-	})
-}
+  }
+  showInstructions();
+  });
+  
+};
 
 /*---------------------------OMDB---------------------------*/
 
+
 function getMovie(){
+  //searches for "Mr. Nobody" if no movie was entered
+  if (searchTerm ===  undefined || searchTerm ==="") {
+    console.log("You didn't enter a movie, so here's my favorite movie!");
+    searchTerm = 'Mr. Nobody'
+    }; 
+
 	var queryUrl = "http://www.omdbapi.com/?t=" + searchTerm + "&y=&plot=short&apikey=" + apiKeys.omdbKey;
 	console.log(queryUrl);
 	request(queryUrl, function(error, response, body) {
@@ -110,13 +126,9 @@ function getMovie(){
   // If the request is successful
   if (!error && response.statusCode === 200) {
 
-    // Parse the body of the site and recover just the imdbRating
-    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-    // console.log(response);
-
     var data = JSON.parse(body);
     console.log(
-    "===========================================================" + "\n" +
+    "-----------------------------------------------------------" + "\n" +
     "Title: " + data.Title + '\n' + 
     "Year: " + data.Year + '\n' + 
     "IMDB Rating: " + data.Ratings[0].Value + '\n' + 
@@ -125,8 +137,43 @@ function getMovie(){
     "Language: " + data.Language + '\n' + 
     "Plot: " + data.Plot + '\n' + 
     "Actors: " + data.Actors + '\n' +
-    "==========================================================="
+    "-----------------------------------------------------------"
   );
-  }
-});
+  };
+  showInstructions();
+  });
+  
 };
+
+
+/*---------------do-what-it-says---------------*/
+
+
+function doWhatItSays(){
+  fs.readFile("random.txt", "utf8", function(err,data){
+    if (err){
+      return console.log('Error occured' + err)
+    }else{
+        var dataArr = data.split(',');
+  		action = dataArr[0];
+  		searchTerm = dataArr[1];
+      switchAction();
+      
+    };
+  });
+  
+};
+
+/*-------------------Log Results -----------------*/
+
+
+function log (logResults) {
+  fs.appendFile('log.txt', logResults, err => {
+    if (err) {
+      throw err
+    };
+  });
+};
+
+showInstructions();
+switchAction();
